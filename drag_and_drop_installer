@@ -1,0 +1,33 @@
+import os
+import shutil
+import maya.cmds as mc
+
+def onMayaDroppedPythonFile(*args):
+    appDir = os.getenv('MAYA_APP_DIR')
+    # modules path --------------------
+    modulesPath = appDir+'/modules'
+    if os.path.isdir(modulesPath) == False:
+        os.mkdir(modulesPath)
+    # default path --------------------
+    defaultInstallPath = appDir+'/scripts'
+    # source path --------------------
+    srcPath = (os.path.dirname(__file__))
+    # install Path ---------------------------
+    thisPath = mc.confirmDialog(b=['Install','Change Path','Cancel'],
+                                m='Doff-Vaccine install path : '+defaultInstallPath,
+                                t='Doff-Vaccine Installer',
+                                bgc=[.1,.1,.1])
+    if thisPath == 'Install':
+        installPath = defaultInstallPath
+    if thisPath == 'Change Path':
+        installPath = mc.fileDialog2(okc='Install',fm=2)[0]
+    print(installPath)
+    # copy Doff-Vaccine folder ----------
+    fromPath = srcPath+'/Doff-Vaccine'
+    toPath = installPath+'/Doff-Vaccine'
+    
+    shutil.copytree(fromPath,toPath)
+    # create doff.mod file ---------------------
+    f = open(modulesPath+'/doff.mod', 'w')
+    f.writelines(['+ doffVaccine 1.0 '+toPath+'\n', 'scripts: '+toPath])
+    f.close()
